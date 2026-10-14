@@ -69,14 +69,24 @@ const login = async (req, res) => {
       'SELECT id, name, email, password_hash FROM users WHERE email = $1',
       [email.toLowerCase()]
     );
+
+    // Email not found → tell the user specifically
     if (result.rows.length === 0) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
+      return res.status(401).json({
+        message: 'No account found with this email address.',
+        field: 'email',
+      });
     }
 
     const user = result.rows[0];
     const isMatch = await bcrypt.compare(password, user.password_hash);
+
+    // Password wrong → tell the user specifically
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
+      return res.status(401).json({
+        message: 'Incorrect password. Please try again.',
+        field: 'password',
+      });
     }
 
     const token = signToken(user);
@@ -90,6 +100,7 @@ const login = async (req, res) => {
     res.status(500).json({ message: 'Server error during login.' });
   }
 };
+
 
 // GET /api/auth/me
 const getMe = async (req, res) => {

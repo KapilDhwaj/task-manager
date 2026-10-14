@@ -14,11 +14,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 — auto logout
+// Handle 401 — auto logout ONLY on protected routes (not on login/register)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url = error.config?.url || '';
+    const isAuthRoute = url.includes('/auth/login') || url.includes('/auth/register');
+
+    if (error.response?.status === 401 && !isAuthRoute) {
+      // Only redirect to login if it's a protected route that rejected us
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';

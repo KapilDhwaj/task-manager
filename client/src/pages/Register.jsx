@@ -15,8 +15,9 @@ const Register = () => {
     register,
     handleSubmit,
     watch,
+    setError,          // ← highlight a specific field
     formState: { errors, isSubmitting },
-  } = useForm();
+  } = useForm({ mode: 'onSubmit' });
 
   const password = watch('password');
 
@@ -29,9 +30,18 @@ const Register = () => {
       toast.success(`Welcome, ${res.data.user.name}! Account created! 🎉`);
       navigate('/');
     } catch (err) {
-      setServerError(err.response?.data?.message || 'Registration failed. Please try again.');
+      const responseData = err.response?.data;
+      const message      = responseData?.message || 'Registration failed. Please try again.';
+
+      // "Email already registered." → highlight the email field
+      if (message.toLowerCase().includes('email')) {
+        setError('email', { type: 'server', message });
+      } else {
+        setServerError(message);
+      }
     }
   };
+
 
   return (
     <div className="min-vh-100 d-flex align-items-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
