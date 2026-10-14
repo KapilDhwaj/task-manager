@@ -24,6 +24,9 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
     task.status !== 'done' &&
     new Date(task.due_date) < new Date();
 
+  // Format the due time for display (HH:MM)
+  const formattedTime = task.due_time ? task.due_time.slice(0, 5) : null;
+
   return (
     <Card
       className={`h-100 shadow-sm border-0 ${isOverdue ? 'border-danger border' : ''}`}
@@ -39,6 +42,11 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
             <Badge bg={PRIORITY_COLORS[task.priority]} className="text-capitalize">
               {task.priority}
             </Badge>
+            {formattedTime && (
+              <Badge bg="dark" title="Reminder set">
+                ⏰ {formattedTime}
+              </Badge>
+            )}
           </div>
           <Dropdown align="end">
             <Dropdown.Toggle variant="link" className="text-muted p-0 border-0" size="sm">
@@ -81,6 +89,7 @@ const TaskCard = ({ task, onEdit, onDelete, onStatusChange }) => {
           {task.due_date ? (
             <small className={`${isOverdue ? 'text-danger fw-bold' : 'text-muted'}`}>
               📅 {isOverdue ? '⚠️ ' : ''}{new Date(task.due_date).toLocaleDateString()}
+              {formattedTime && <span className="ms-1 text-muted">at {formattedTime}</span>}
             </small>
           ) : (
             <small className="text-muted">No due date</small>

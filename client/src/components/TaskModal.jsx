@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 
@@ -20,15 +20,16 @@ const TaskModal = ({ show, onHide, onSubmit, task }) => {
         status:      task.status      || 'todo',
         priority:    task.priority    || 'medium',
         due_date:    task.due_date    ? task.due_date.split('T')[0] : '',
+        due_time:    task.due_time    ? task.due_time.slice(0, 5)   : '',
       });
     } else {
-      reset({ title: '', description: '', status: 'todo', priority: 'medium', due_date: '' });
+      reset({ title: '', description: '', status: 'todo', priority: 'medium', due_date: '', due_time: '' });
     }
   }, [task, reset]);
 
   const handleFormSubmit = async (data) => {
-    // Convert empty string to null
-    if (!data.due_date) data.due_date = null;
+    if (!data.due_date)  data.due_date  = null;
+    if (!data.due_time)  data.due_time  = null;
     if (!data.description) data.description = null;
     await onSubmit(data);
   };
@@ -94,6 +95,23 @@ const TaskModal = ({ show, onHide, onSubmit, task }) => {
               <Form.Group>
                 <Form.Label className="fw-semibold">Due Date</Form.Label>
                 <Form.Control type="date" {...register('due_date')} />
+              </Form.Group>
+            </Col>
+
+            {/* Due Time — reminder alarm */}
+            <Col md={12}>
+              <Form.Group>
+                <Form.Label className="fw-semibold">
+                  ⏰ Reminder Time <span className="text-muted fw-normal">(optional — get a system alert at this time)</span>
+                </Form.Label>
+                <Form.Control
+                  type="time"
+                  style={{ maxWidth: '200px' }}
+                  {...register('due_time')}
+                />
+                <Form.Text className="text-muted">
+                  You'll receive browser notifications at 24 hours, 1 hour, 15 minutes, and at the deadline.
+                </Form.Text>
               </Form.Group>
             </Col>
           </Row>

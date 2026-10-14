@@ -55,7 +55,7 @@ const getTaskById = async (req, res) => {
 
 // POST /api/tasks
 const createTask = async (req, res) => {
-  const { title, description, status, priority, due_date } = req.body;
+  const { title, description, status, priority, due_date, due_time } = req.body;
   const userId = req.user.id;
 
   if (!title || title.trim() === '') {
@@ -74,8 +74,8 @@ const createTask = async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO tasks (user_id, title, description, status, priority, due_date)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO tasks (user_id, title, description, status, priority, due_date, due_time)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [
         userId,
@@ -84,6 +84,7 @@ const createTask = async (req, res) => {
         status || 'todo',
         priority || 'medium',
         due_date || null,
+        due_time || null,
       ]
     );
     res.status(201).json({ message: 'Task created!', task: result.rows[0] });
@@ -96,7 +97,7 @@ const createTask = async (req, res) => {
 // PUT /api/tasks/:id
 const updateTask = async (req, res) => {
   const { id } = req.params;
-  const { title, description, status, priority, due_date } = req.body;
+  const { title, description, status, priority, due_date, due_time } = req.body;
   const userId = req.user.id;
 
   // Verify ownership
@@ -124,8 +125,9 @@ const updateTask = async (req, res) => {
            description = COALESCE($2, description),
            status      = COALESCE($3, status),
            priority    = COALESCE($4, priority),
-           due_date    = COALESCE($5, due_date)
-       WHERE id = $6 AND user_id = $7
+           due_date    = COALESCE($5, due_date),
+           due_time    = $6
+       WHERE id = $7 AND user_id = $8
        RETURNING *`,
       [
         title ? title.trim() : null,
@@ -133,6 +135,7 @@ const updateTask = async (req, res) => {
         status || null,
         priority || null,
         due_date !== undefined ? due_date : null,
+        due_time !== undefined ? due_time : null,
         id,
         userId,
       ]
